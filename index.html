@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOOK-A-STAR - Spotify Edition 🇺🇬</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
+:root{--yellow:#FCD116;--red:#CE1126;--black:#000;--card:#181818;--card-hover:#282828;--bg:#0a0a0a}
+body{background:var(--black);color:#fff;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:260px;background:#000;padding:12px 8px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.side-box{background:#121212;border-radius:8px;padding:8px}
+.logo{color:var(--yellow);font-weight:900;font-size:18px;padding:12px 12px;display:flex;gap:8px;align-items:center}
+.side-nav{display:flex;flex-direction:column;gap:2px}
+.side-nav a{color:#b3b3b3;padding:10px 12px;border-radius:6px;font-size:13px;font-weight:700;display:flex;gap:14px;align-items:center;cursor:pointer;text-decoration:none;transition:.15s}
+.side-nav a:hover{color:#fff}.side-nav a.active{background:#222;color:#fff}
+.side-nav a.yellow{color:var(--yellow)}.side-nav a.red{color:var(--red)}
+.side-title{font-size:11px;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:1px;padding:14px 12px 6px}
+.library-card{background:#1a1a1a;border-radius:6px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.library-card:hover{background:#282828}.library-card img{width:44px;height:44px;border-radius:4px;object-fit:cover}
+.main{flex:1;background:linear-gradient(180deg,#1a1a0a 0%,#0a0a0a 30%,#000 100%);overflow-y:auto;display:flex;flex-direction:column}
+.topbar{height:64px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;background:rgba(0,0,0,.7);backdrop-filter:blur(20px)}
+.search-bar{max-width:350px;flex:1;margin:0 20px;position:relative}
+.search-bar input{width:100%;background:#242424;border:none;border-radius:20px;padding:10px 14px 10px 38px;color:#fff;outline:none;font-size:13px;font-weight:600}
+.search-bar i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#aaa}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:800;border:none;cursor:pointer;transition:.15s}
+.btn-yellow{background:var(--yellow);color:#000}.btn-red{background:var(--red);color:#fff}.btn-dark{background:#fff;color:#000}
+.content{padding:0 24px 40px}
+.hero{background:linear-gradient(135deg,var(--yellow) 0%,#ff9500 40%,var(--red) 100%);border-radius:12px;padding:28px;display:flex;gap:20px;align-items:center;margin:8px 0 24px}
+.hero-img{width:180px;height:180px;border-radius:8px;background:#000;box-shadow:0 20px 40px rgba(0,0,0,.5);flex-shrink:0;display:grid;place-items:center;font-size:80px}
+.hero-text h1{font-size:42px;font-weight:900;line-height:1;color:#000}.hero-text h1 span{color:#fff}
+.hero-text p{color:#000;font-weight:700;margin-top:8px;font-size:14px}
+.play-btn-big{width:56px;height:56px;border-radius:50%;background:var(--yellow);color:#000;border:none;display:grid;place-items:center;font-size:20px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.section{margin-top:28px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-head h2{font-size:22px;font-weight:800}
+.row-scroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
+.row-scroll::-webkit-scrollbar{display:none}
+.sp-card{min-width:180px;max-width:180px;background:var(--card);border-radius:8px;padding:12px;cursor:pointer;transition:.15s;position:relative;flex-shrink:0}
+.sp-card:hover{background:var(--card-hover)}
+.sp-card-img{width:100%;height:156px;border-radius:6px;background-size:cover;background-position:center;position:relative;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.sp-play{position:absolute;bottom:8px;right:8px;width:48px;height:48px;border-radius:50%;background:var(--yellow);color:#000;display:grid;place-items:center;opacity:0;transform:translateY(8px);transition:.2s;box-shadow:0 8px 16px rgba(0,0,0,.4);font-size:16px}
+.sp-card:hover.sp-play{opacity:1;transform:translateY(0)}
+.sp-card h4{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-card p{font-size:12px;color:#b3b3b3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{position:absolute;top:8px;left:8px;font-size:9px;font-weight:900;padding:4px 8px;border-radius:10px}
+.badge-yellow{background:var(--yellow);color:#000}.badge-red{background:var(--red);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.sidebar{display:none}.grid{grid-template-columns:repeat(3,1fr)}.hero-text h1{font-size:28px}.hero-img{width:120px;height:120px;font-size:50px}}
+@media(max-width:600px){.grid{grid-template-columns:1fr 1fr}.content{padding:0 14px 40px}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(16px);z-index:2000;display:none;place-items:center;padding:20px}.overlay.show{display:grid}
+.modal{background:#181818;border-radius:12px;width:100%;max-width:480px;overflow:hidden;border:1px solid #333}
+.modal-head{padding:16px 18px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;font-weight:800;background:#000;color:var(--yellow)}
+.close{width:28px;height:28px;border-radius:50%;background:#222;display:grid;place-items:center;cursor:pointer}
+.modal-body{padding:18px}
+.input{width:100%;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:6px;padding:12px;color:#fff;margin-bottom:10px;font-size:13px;outline:none}
+.bookbtn{width:100%;padding:14px;border-radius:24px;background:var(--yellow);color:#000;font-weight:900;border:none;cursor:pointer}
+.verifybtn{width:100%;padding:14px;border-radius:24px;background:var(--red);color:#fff;font-weight:900;border:none;cursor:pointer}
+.admin-modal{max-width:1100px;width:95%;background:#121212;border:1px solid #333;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;max-height:90vh}
+.admin-header{padding:20px 24px;background:#000;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center}
+.admin-header h2{font-size:20px;font-weight:900;display:flex;gap:10px;align-items:center}.admin-header h2 span{color:var(--yellow)}
+.admin-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:20px 24px;background:#0e0e0e;border-bottom:1px solid #222}
+.stat-card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font-size:14px}
+.stat-card b{font-size:22px;font-weight:900}.stat-card p{font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.stat-yellow.stat-icon{background:rgba(252,209,22,.15);color:var(--yellow)}.stat-yellow b{color:var(--yellow)}
+.stat-red.stat-icon{background:rgba(206,18,38,.15);color:var(--red)}.stat-red b{color:var(--red)}
+.stat-white.stat-icon{background:#222;color:#fff}
+.admin-tabs{padding:16px 24px;display:flex;gap:8px;border-bottom:1px solid #222;background:#121212;flex-wrap:wrap}
+.tab{padding:10px 18px;border-radius:20px;font-size:12px;font-weight:800;border:1px solid #333;background:#1a1a1a;color:#aaa;cursor:pointer;display:flex;gap:8px;align-items:center;transition:.15s}
+.tab:hover{color:#fff}.tab.active{background:var(--yellow);color:#000;border-color:var(--yellow)}.tab.active-red{background:var(--red);color:#fff;border-color:var(--red)}
+.count{background:#000;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px}
+.admin-content{padding:20px 24px;overflow-y:auto;flex:1;background:#121212}
+.admin-table{width:100%;border-collapse:collapse}
+.admin-table th{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;padding:10px 12px;text-align:left;border-bottom:1px solid #222;font-weight:800}
+.admin-table td{padding:12px;font-size:12px;border-bottom:1px solid #1a1a1a}
+.admin-table tr:hover{background:#1a1a1a}
+.artist-cell{display:flex;gap:10px;align-items:center}
+.artist-cell img{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #333}
+.mini-btn{padding:6px 12px;border-radius:20px;font-size:10px;font-weight:800;border:none;cursor:pointer}
+.mini-yellow{background:var(--yellow);color:#000}.mini-red{background:var(--red);color:#fff}.mini-dark{background:#222;color:#fff;border:1px solid #333}
+.price-input{width:80px;background:#000;border:1px solid #333;border-radius:6px;padding:6px;color:#fff;font-size:11px;font-weight:700}
+.add-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:20px}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="side-box">
+<div class="logo"><i class="fa-solid fa-star"></i> BOOK-A-STAR</div>
+<div class="side-nav">
+<a class="active" onclick="showView('home')"><i class="fa-solid fa-house"></i> Home</a>
+<a onclick="showView('search')"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+<a onclick="showView('top')"><i class="fa-solid fa-fire" style="color:var(--yellow)"></i> Top Artists</a>
+<a onclick="showView('up')"><i class="fa-solid fa-rocket" style="color:var(--red)"></i> Upcoming</a>
+<a onclick="showView('venue')"><i class="fa-solid fa-location-dot"></i> Venues</a>
+</div>
+</div>
+<div class="side-box" style="flex:1;overflow-y:auto">
+<div class="side-title">Your Library - Uganda 🇺🇬</div>
+<div class="side-nav">
+<a class="yellow" onclick="openArtistReg()"><i class="fa-solid fa-plus"></i> Free Registration</a>
+<a class="red" onclick="openVerifyForm()"><i class="fa-solid fa-circle-check"></i> Verification - 50K</a>
+<a onclick="openAdminLogin()"><i class="fa-solid fa-shield"></i> Admin Dashboard</a>
+</div>
+<div class="side-title" style="margin-top:12px">Best Selling This Week</div>
+<div id="sideBest"></div>
+</div>
+</div>
+
+<div class="main">
+<div class="topbar">
+<div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input id="search" placeholder="What do you want to book?"></div>
+<div class="topbar-right">
+<select onchange="filterLoc(this.value)" style="background:#111;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:20px;font-size:11px;font-weight:700"><option value="all">All Uganda</option><option value="kampala">Kampala</option><option value="jinja">Jinja</option><option value="gulu">Gulu</option><option value="mbarara">Mbarara</option></select>
+<button class="btn btn-yellow" onclick="openArtistReg()">Free Reg</button>
+<button class="btn btn-red" onclick="openVerifyForm()">50K Verify</button>
+<button class="btn btn-dark" onclick="openAdminLogin()"><i class="fa-solid fa-shield"></i> Admin</button>
+</div>
+</div>
+
+<div class="content">
+<div id="view-home">
+<div class="hero"><div class="hero-img">🇺🇬</div><div class="hero-text"><p>Playlist • Uganda's #1 Booking</p><h1>BOOK-A-STAR <span>Today</span></h1><p>15 Top Verified • 10 Upcoming • 10 Venues • Airtel Money 0742086796</p><div style="margin-top:16px;display:flex;gap:10px"><button class="play-btn-big" onclick="showView('top')"><i class="fa-solid fa-play"></i></button><button class="btn btn-dark" style="border-radius:24px;padding:10px 20px" onclick="showView('top')">Browse Top Artists</button></div></div></div>
+<div class="section"><div class="section-head"><h2>📅 Upcoming Events</h2><span onclick="showView('up')">Show all</span></div><div class="row-scroll" id="homeUpcomingEvents"></div></div>
+<div class="section"><div class="section-head"><h2>🔥 Last Concerts - Highlights</h2><span>Show all</span></div><div class="row-scroll" id="homeLastConcerts"></div></div>
+<div class="section"><div class="section-head"><h2>🏆 Best Selling Artists</h2><span onclick="showView('top')">Show all</span></div><div class="row-scroll" id="homeBestSelling"></div></div>
+<div class="section"><div class="section-head"><h2>⭐ Top Artists - Made for Uganda</h2><span onclick="showView('top')">Show all</span></div><div class="grid" id="homeTopGrid"></div></div>
+</div>
+<div id="view-top" style="display:none"><div class="section"><div class="section-head"><h2>⭐ Top Artists - 15 Verified</h2><span id="cTop"></span></div><div class="grid" id="gridTop"></div></div></div>
+<div id="view-up" style="display:none"><div class="section"><div class="section-head"><h2>🚀 Upcoming Artists - 10</h2><span id="cUp"></span></div><div class="grid" id="gridUp"></div></div></div>
+<div id="view-venue" style="display:none"><div class="section"><div class="section-head"><h2>📍 Popular Venues - 10</h2><span id="cVenue"></span></div><div class="grid" id="gridVenue"></div></div></div>
+<div id="view-search" style="display:none"><div class="section"><div class="section-head"><h2>🔍 Browse All</h2></div><div class="grid" id="gridAll"></div></div></div>
+</div>
+</div>
+
+<div class="overlay" id="bookOverlay"><div class="modal"><div class="modal-head"><span id="bName">Book</span><div class="close" onclick="closeAll()"><i class="fa-solid fa-xmark"></i></div></div><div class="modal-body">
+<div style="display:flex;gap:12px;align-items:center;background:#000;border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:12px"><img id="bImg" style="width:56px;height:56px;border-radius:6px;object-fit:cover"><div style="flex:1"><div id="bName2" style="font-weight:800"></div><div id="bLoc" style="font-size:11px;color:#888"></div></div><div id="bPrice" style="background:var(--yellow);color:#000;font-weight:900;padding:4px 10px;border-radius:20px;font-size:12px"></div></div>
+<input class="input" id="cName" placeholder="Your Name *"><input class="input" id="cPhone" placeholder="Phone *"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input class="input" id="cDate" type="date"><input class="input" id="cLocation" placeholder="Location"></div>
+<select class="input" id="cType"><option>Wedding</option><option>Birthday</option><option>Concert</option><option>Corporate</option><option>Club</option></select>
+<div style="background:#000;border:1px solid var(--yellow);border-radius:8px;padding:10px;margin:12px 0;font-size:11px">💳 Pay to <b style="color:var(--yellow)">Airtel 0742086796</b> - <b id="bPay"></b> for <span id="bPayName"></span></div>
+<button class="bookbtn" onclick="doBooking()">Pay & Whatsapp Proof</button>
+</div></div></div>
+
+<div class="overlay" id="regOverlay"><div class="modal"><div class="modal-head"><span>Free Registration</span><div class="close" onclick="closeAll()"><i class="fa-solid fa-xmark"></i></div></div><div class="modal-body">
+<input class="input" id="rStage" placeholder="Stage Name *"><input class="input" id="rPhone" placeholder="Phone *"><input class="input" id="rLoc" placeholder="Location"><input class="input" id="rPrice" placeholder="Price"><input class="input" id="rGenre" placeholder="Genre"><input class="input" id="rPass" type="password" placeholder="Password *"><input class="input" id="rImg" placeholder="Photo URL">
+<button class="bookbtn" onclick="doRegister()">Submit FREE</button>
+</div></div></div>
+
+<div class="overlay" id="verifyOverlay"><div class="modal"><div class="modal-head" style="color:var(--red)"><span>Verification - 50K</span><div class="close" onclick="closeAll()"><i class="fa-solid fa-xmark"></i></div></div><div class="modal-body">
+<div style="background:#000;border:1px solid var(--red);border-radius:8px;padding:10px;margin-bottom:10px;font-size:11px">🔴 Pay 50K to 0742086796 → Enter Trans ID</div>
+<input class="input" id="vStage" placeholder="Stage Name *"><input class="input" id="vPhone" placeholder="Phone *"><input class="input" id="vTrans" placeholder="Transaction ID *">
+<button class="verifybtn" onclick="doVerifyRequest()">Submit Verification</button>
+</div></div></div>
+
+<div class="overlay" id="adminLoginOverlay"><div class="modal" style="max-width:360px"><div class="modal-head"><span>Admin Login</span><div class="close" onclick="closeAll()"><i class="fa-solid fa-xmark"></i></div></div><div class="modal-body">
+<input class="input" id="aUser" placeholder="admin"><input class="input" id="aPass" type="password" placeholder="1234"><button class="bookbtn" onclick="adminLogin()">Login to Dashboard</button>
+</div></div></div>
+
+<div class="overlay" id="adminOverlay">
+<div class="admin-modal">
+<div class="admin-header">
+<h2><i class="fa-solid fa-chart-line" style="color:var(--yellow)"></i> Admin <span>Dashboard</span> - BOOK-A-STAR UG</h2>
+<div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:#888;font-weight:700">Airtel: 0742086796</span><div class="close" onclick="closeAll()" style="width:36px;height:36px"><i class="fa-solid fa-xmark"></i></div></div>
+</div>
+<div class="admin-stats">
+<div class="stat-card stat-yellow"><div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div><b id="statRevenue">0K</b><p>Est. Revenue</p></div>
+<div class="stat-card stat-red"><div class="stat-icon"><i class="fa-solid fa-clock"></i></div><b id="statPending">0</b><p>Pending Free Reg</p></div>
+<div class="stat-card stat-red"><div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div><b id="statVerify">0</b><p>Verify Requests</p></div>
+<div class="stat-card stat-white"><div class="stat-icon"><i class="fa-solid fa-star"></i></div><b>15</b><p>Top Verified</p></div>
+<div class="stat-card stat-white"><div class="stat-icon"><i class="fa-solid fa-rocket"></i></div><b>10</b><p>Upcoming</p></div>
+</div>
+<div class="admin-tabs">
+<button class="tab" id="tab-pending" onclick="adminTab('pending')"><i class="fa-solid fa-hourglass-half"></i> Free Reg <span class="count" id="pCount">0</span></button>
+<button class="tab" id="tab-verify" onclick="adminTab('verify')"><i class="fa-solid fa-certificate"></i> 50K Verify <span class="count" id="vCount">0</span></button>
+<button class="tab" id="tab-upcoming" onclick="adminTab('upcoming')"><i class="fa-solid fa-rocket"></i> Upcoming Artists</button>
+<button class="tab" id="tab-top" onclick="adminTab('top')"><i class="fa-solid fa-star"></i> Top 15</button>
+<button class="tab" id="tab-add" onclick="adminTab('add')"><i class="fa-solid fa-plus"></i> Add New</button>
+<button class="tab" id="tab-venues" onclick="adminTab('venues')"><i class="fa-solid fa-location-dot"></i> Venues 10</button>
+</div>
+<div class="admin-content" id="adminContent"></div>
+</div>
+</div>
+
+<script>
+const APP_VERSION="v20_toggle_verify";
+if(localStorage.getItem('app_version')!==APP_VERSION){localStorage.removeItem('artists_top');localStorage.removeItem('artists_upcoming');localStorage.removeItem('artists_venues');localStorage.setItem('app_version',APP_VERSION);}
+const TOP=[
+{name:"Bobi Wine",loc:"Kampala",genre:"Afrobeat",price:"5M",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",sales:523},
+{name:"Sheebah",loc:"Kampala",genre:"Dancehall",price:"3M",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",sales:412},
+{name:"Eddy Kenzo",loc:"Kampala",genre:"Afro",price:"4M",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",sales:389},
+{name:"Spice Diana",loc:"Kampala",genre:"Pop",price:"2.5M",img:"https://images.unsplash.com/photo-1514320290767-e5b4a6efb2d2?w=400",sales:356},
+{name:"Fik Fameica",loc:"Kampala",genre:"HipHop",price:"2M",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",sales:298},
+{name:"Azawi",loc:"Kampala",genre:"Afro",price:"2M",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",sales:276},
+{name:"King Saha",loc:"Kampala",genre:"Afrobeat",price:"1.5M",img:"https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=400",sales:245},
+{name:"Lydia Jazmine",loc:"Kampala",genre:"R&B",price:"1.2M",img:"https://images.unsplash.com/photo-1520975661595-6453be3f7070?w=400",sales:221},
+{name:"Bebe Cool",loc:"Kampala",genre:"Afrobeat",price:"4.5M",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",sales:498},
+{name:"Jose Chameleone",loc:"Kampala",genre:"Afrobeat",price:"4M",img:"https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=400",sales:465},
+{name:"Pallaso",loc:"Kampala",genre:"Dancehall",price:"2M",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",sales:234},
+{name:"Alien Skin",loc:"Kampala",genre:"Afro",price:"1.8M",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",sales:212},
+{name:"Karole Kasita",loc:"Kampala",genre:"Dancehall",price:"1.5M",img:"https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400",sales:198},
+{name:"Winnie Nwagi",loc:"Kampala",genre:"Afrobeat",price:"1.8M",img:"https://images.unsplash.com/photo-1520975661595-6453be3f7070?w=400",sales:187},
+{name:"Gravity Omutujju",loc:"Kampala",genre:"HipHop",price:"1.2M",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",sales:165}
+];
+const UP=[
+{name:"Zuli Tums",loc:"Jinja",price:"300K",img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",genre:"Afrobeat"},
+{name:"Rex Sound",loc:"Gulu",price:"250K",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",genre:"Dancehall"},
+{name:"Mukisa Ray",loc:"Kampala",price:"400K",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",genre:"HipHop"},
+{name:"Luna V",loc:"Kampala",price:"350K",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",genre:"R&B"},
+{name:"K2 Young",loc:"Jinja",price:"200K",img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",genre:"Afro"},
+{name:"Tracy M",loc:"Gulu",price:"280K",img:"https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400",genre:"Pop"},
+{name:"Dax Vibez",loc:"Kampala",price:"600K",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",genre:"Afrobeat"},
+{name:"Recho Rey",loc:"Kampala",price:"500K",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",genre:"Dancehall"},
+{name:"Victor Ruz",loc:"Kampala",price:"450K",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",genre:"R&B"},
+{name:"Ava Peace",loc:"Kampala",price:"700K",img:"https://images.unsplash.com/photo-1514320290767-e5b4a6efb2d2?w=400",genre:"Pop"}
+];
+const VENUES=[
+{name:"Guilt",loc:"Kampala",cap:"1000",price:"2M",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400"},
+{name:"The Villa",loc:"Kampala",cap:"800",price:"1.5M",img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400"},
+{name:"Jinja Sailing Club",loc:"Jinja",cap:"500",price:"800K",img:"https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400"},
+{name:"Acholi Inn",loc:"Gulu",cap:"600",price:"1M",img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400"},
+{name:"La Cabana",loc:"Kampala",cap:"400",price:"600K",img:"https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400"},
+{name:"Sky Lounge",loc:"Kampala",cap:"1200",price:"3M",img:"https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400"},
+{name:"Mestil Hotel",loc:"Kampala",cap:"1500",price:"3.5M",img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400"},
+{name:"Jinja Nile Resort",loc:"Jinja",cap:"900",price:"2.2M",img:"https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400"},
+{name:"Pearl of Africa",loc:"Kampala",cap:"2000",price:"5M",img:"https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400"},
+{name:"Bomah Hotel Gulu",loc:"Gulu",cap:"700",price:"1.2M",img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400"}
+];
+const EVENTS=[
+{title:"Kampala Music Festival",date:"28 Sep 2026",artist:"Bobi Wine + Azawi",loc:"Lugogo Cricket Oval",img:"https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400",price:"50K"},
+{title:"Jinja Afro Night",date:"02 Oct 2026",artist:"Fik Fameica & Pallaso",loc:"Jinja Sailing Club",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",price:"30K"},
+{title:"Gulu Cultural Gala",date:"05 Oct 2026",artist:"Eddy Kenzo",loc:"Acholi Inn",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",price:"20K"},
+{title:"Wedding Expo Kampala",date:"10 Oct 2026",artist:"Spice Diana Live",loc:"Mestil Hotel",img:"https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400",price:"100K"},
+{title:"Birthday Bash - Sheebah",date:"12 Oct 2026",artist:"Sheebah Karungi",loc:"Guilt Club",img:"https://images.unsplash.com/photo-1514320290767-e5b4a6efb2d2?w=400",price:"80K"},
+{title:"Mbarara Youth Concert",date:"15 Oct 2026",artist:"Bebe Cool",loc:"Mbarara Stadium",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",price:"25K"}
+];
+const LAST_CONCERTS=[
+{title:"Roast & Rhyme 2026",artist:"Bebe Cool, Azawi",views:"12K",img:"https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400",date:"10 Sep 2026"},
+{title:"Blankets & Wine",artist:"King Saha Live",views:"8.5K",img:"https://images.unsplash.com/photo-1516450360452-9312abbf6f7e?w=400",date:"01 Sep 2026"},
+{title:"Nyege Nyege Festival",artist:"Various Artists",views:"22K",img:"https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",date:"25 Aug 2026"},
+{title:"Sheebah - Neyanziza",artist:"Sheebah Concert",views:"15K",img:"https://images.unsplash.com/photo-1514320290767-e5b4a6efb2d2?w=400",date:"18 Aug 2026"},
+{title:"Eddy Kenzo Festival",artist:"Eddy Kenzo",views:"18K",img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400",date:"05 Aug 2026"}
+];
+function getData(k,def){if(!localStorage.getItem(k))localStorage.setItem(k,JSON.stringify(def));return JSON.parse(localStorage.getItem(k))}
+function saveData(k,v){localStorage.setItem(k,JSON.stringify(v))}
+let curBook=null;
+function showView(v){document.querySelectorAll('[id^="view-"]').forEach(e=>e.style.display='none');document.getElementById('view-'+v).style.display='block';document.querySelector('.main').scrollTop=0;}
+function render(){
+ const t=getData('artists_top',TOP), u=getData('artists_upcoming',UP), venues=getData('artists_venues',VENUES);
+ document.getElementById('cTop').innerText=t.length+" verified";document.getElementById('cUp').innerText=u.length+" artists";document.getElementById('cVenue').innerText=venues.length+" venues";
+ const card=(a,verified=false)=>`<div class="sp-card" onclick="openBook('${a.name}','${a.price}','${a.loc}','${a.img}')" data-loc="${a.loc.toLowerCase()}" data-name="${a.name.toLowerCase()}"><div class="sp-card-img" style="background-image:url('${a.img}')">${verified?'<div class="badge badge-yellow">✔ VERIFIED</div>':'<div class="badge badge-red">NOT VERIFIED</div>'}<div class="sp-play"><i class="fa-solid fa-play"></i></div></div><h4>${a.name} ${verified?'<i class="fa-solid fa-circle-check" style="color:var(--yellow)"></i>':''}</h4><p>📍 ${a.loc} • ${a.genre||'Cap '+a.cap}</p><span style="background:#000;border:1px solid var(--yellow);color:var(--yellow);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;display:inline-block;margin-top:6px">${a.price}</span></div>`;
+ document.getElementById('gridTop').innerHTML=t.map(a=>card(a,true)).join('');
+ document.getElementById('homeTopGrid').innerHTML=t.slice(0,10).map(a=>card(a,true)).join('');
+ document.getElementById('gridUp').innerHTML=u.map(a=>card(a,false)).join('');
+ document.getElementById('gridVenue').innerHTML=venues.map(v=>`<div class="sp-card" onclick="openBook('${v.name}','${v.price}','${v.loc}','${v.img}')" data-loc="${v.loc.toLowerCase()}" data-name="${v.name.toLowerCase()}"><div class="sp-card-img" style="background-image:url('${v.img}')"><div class="sp-play"><i class="fa-solid fa-play"></i></div></div><h4>${v.name}</h4><p>📍 ${v.loc} • Cap ${v.cap}</p><span style="background:#000;border:1px solid #333;color:#fff;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;display:inline-block;margin-top:6px">${v.price}</span></div>`).join('');
+ document.getElementById('gridAll').innerHTML=[...t,...u,...venues].map(a=>card(a,t.some(x=>x.name===a.name))).join('');
+ document.getElementById('homeUpcomingEvents').innerHTML=EVENTS.map(e=>`<div class="sp-card" style="min-width:220px;max-width:220px"><div class="sp-card-img" style="background-image:url('${e.img}')"><div class="badge badge-yellow">${e.date}</div><div class="sp-play"><i class="fa-solid fa-ticket"></i></div></div><h4>${e.title}</h4><p>${e.artist} • ${e.loc}</p><span style="background:var(--yellow);color:#000;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;display:inline-block;margin-top:6px">${e.price} Entry</span></div>`).join('');
+ document.getElementById('homeLastConcerts').innerHTML=LAST_CONCERTS.map(e=>`<div class="sp-card" style="min-width:200px;max-width:200px"><div class="sp-card-img" style="background-image:url('${e.img}')"><div class="badge" style="background:#000;color:#fff;border:1px solid #333">👁 ${e.views}</div><div class="sp-play"><i class="fa-solid fa-play"></i></div></div><h4>${e.title}</h4><p>${e.artist}</p><span style="font-size:10px;color:#888">${e.date}</span></div>`).join('');
+ const bestSorted=[...t].sort((a,b)=>b.sales-a.sales);
+ document.getElementById('homeBestSelling').innerHTML=bestSorted.slice(0,6).map((a,i)=>`<div class="sp-card" style="min-width:200px;max-width:200px" onclick="openBook('${a.name}','${a.price}','${a.loc}','${a.img}')"><div class="sp-card-img" style="background-image:url('${a.img}')"><div class="badge badge-yellow">#${i+1} BEST SELLER</div><div class="sp-play"><i class="fa-solid fa-crown"></i></div></div><h4>${a.name}</h4><p>${a.sales} bookings • ${a.price}</p></div>`).join('');
+ document.getElementById('sideBest').innerHTML=bestSorted.slice(0,4).map(a=>`<div class="library-card" onclick="openBook('${a.name}','${a.price}','${a.loc}','${a.img}')"><img src="${a.img}"><div><b style="font-size:12px">${a.name}</b><p style="font-size:10px;color:#888">${a.sales} bookings</p></div></div>`).join('');
+ const pending=JSON.parse(localStorage.getItem('pending_artists')||'[]').length;
+ const verify=JSON.parse(localStorage.getItem('verify_requests')||'[]').length;
+ document.getElementById('statPending').innerText=pending;
+ document.getElementById('statVerify').innerText=verify;
+ document.getElementById('statRevenue').innerText=(verify*50)+'K';
+ document.getElementById('pCount').innerText=pending;
+ document.getElementById('vCount').innerText=verify;
+}
+function filterLoc(loc){document.querySelectorAll('.sp-card').forEach(c=>{if(!c.dataset.loc)return;if(loc==='all')c.style.display='';else c.style.display=c.dataset.loc.includes(loc)?'':'none'})}
+function openBook(name,price,loc,img){curBook={name,price,loc,img};document.getElementById('bName').innerText='Book '+name;document.getElementById('bName2').innerText=name;document.getElementById('bLoc').innerText=loc;document.getElementById('bPrice').innerText=price;document.getElementById('bImg').src=img;document.getElementById('bPay').innerText=price+' UGX';document.getElementById('bPayName').innerText=name;document.getElementById('bookOverlay').classList.add('show')}
+function closeAll(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'))}
+function doBooking(){const n=document.getElementById('cName').value,p=document.getElementById('cPhone').value,d=document.getElementById('cDate').value;if(!n||!p||!d){alert('Fill');return}const msg=encodeURIComponent(`BOOKING ${curBook.name} ${curBook.price} Client ${n} ${p} Date ${d} Paid 0742086796`);window.open('https://wa.me/256742086796?text='+msg,'_blank');closeAll()}
+function openArtistReg(){document.getElementById('regOverlay').classList.add('show')}
+function doRegister(){const data={id:Date.now(),name:document.getElementById('rStage').value.trim(),phone:document.getElementById('rPhone').value.trim(),loc:document.getElementById('rLoc').value.trim()||'Kampala',price:document.getElementById('rPrice').value.trim()||'300K',genre:document.getElementById('rGenre').value.trim()||'Artist',password:document.getElementById('rPass').value.trim(),img:document.getElementById('rImg').value.trim()||'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',createdAt:new Date().toLocaleString()};if(!data.name||!data.phone||!data.password){alert('Fill');return}let pend=JSON.parse(localStorage.getItem('pending_artists')||'[]');pend.push(data);localStorage.setItem('pending_artists',JSON.stringify(pend));alert('✅ Sent!');closeAll();render();}
+function openVerifyForm(n=''){document.getElementById('verifyOverlay').classList.add('show');if(n)document.getElementById('vStage').value=n}
+function doVerifyRequest(){const name=document.getElementById('vStage').value.trim(),phone=document.getElementById('vPhone').value.trim(),trans=document.getElementById('vTrans').value.trim();if(!name||!phone||!trans){alert('Fill');return}const req={id:Date.now(),name,phone,transId:trans,amount:'50000',date:new Date().toLocaleString()};let list=JSON.parse(localStorage.getItem('verify_requests')||'[]');list.push(req);localStorage.setItem('verify_requests',JSON.stringify(list));alert('✅ Submitted!');closeAll();render();}
+function openAdminLogin(){document.getElementById('adminLoginOverlay').classList.add('show')}
+function adminLogin(){if(document.getElementById('aUser').value==='admin'&&document.getElementById('aPass').value==='1234'){closeAll();document.getElementById('adminOverlay').classList.add('show');adminTab('pending')}else alert('Wrong: admin / 1234')}
+
+function adminTab(tab){
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active','active-red'));
+ const tabEl=document.getElementById('tab-'+tab);
+ if(tabEl){ if(tab==='verify') tabEl.classList.add('active-red'); else tabEl.classList.add('active'); }
+ const c=document.getElementById('adminContent');
+ if(tab==='pending'){
+  let p=JSON.parse(localStorage.getItem('pending_artists')||'[]');
+  if(!p.length){c.innerHTML=`<div style="text-align:center;padding:60px 20px"><div style="width:80px;height:80px;background:#1a1a1a;border-radius:50%;display:grid;place-items:center;margin:0 auto 16px;font-size:28px">📭</div><h3 style="font-size:16px;font-weight:800">No pending registrations</h3></div>`;return}
+  c.innerHTML=`<table class="admin-table"><thead><tr><th>Artist</th><th>Contact</th><th>Location / Price</th><th>Date</th><th>Action</th></tr></thead><tbody>${p.map((a,i)=>`<tr><td><div class="artist-cell"><img src="${a.img}"><div><b>${a.name}</b><span>${a.genre}</span></div></div></td><td><div style="font-weight:700">${a.phone}</div></td><td>📍 ${a.loc} <b style="color:var(--yellow)">${a.price}</b></td><td style="font-size:11px;color:#888">${a.createdAt}</td><td><div style="display:flex;gap:6px"><button class="mini-btn mini-yellow" onclick="approve(${i})"><i class="fa-solid fa-check"></i> Approve</button><button class="mini-btn mini-dark" onclick="reject(${i})">Reject</button></div></td></tr>`).join('')}</tbody></table>`;
+ }
+ if(tab==='verify'){
+  let v=JSON.parse(localStorage.getItem('verify_requests')||'[]');
+  if(!v.length){c.innerHTML=`<div style="text-align:center;padding:60px 20px"><h3>No verification requests</h3></div>`;return}
+  c.innerHTML=`<table class="admin-table"><thead><tr><th>Artist</th><th>Transaction ID</th><th>Amount</th><th>Date</th><th>Action</th></tr></thead><tbody>${v.map((a,i)=>`<tr><td><div class="artist-cell"><div style="width:44px;height:44px;border-radius:8px;background:var(--red);display:grid;place-items:center;font-weight:900">${a.name.charAt(0)}</div><div><b>${a.name}</b><span>${a.phone}</span></div></div></td><td><div style="background:#000;border:1px solid var(--yellow);padding:6px 10px;border-radius:6px;font-family:monospace;color:var(--yellow);display:inline-block">${a.transId}</div></td><td><b style="color:var(--red)">${a.amount} UGX</b></td><td style="font-size:11px;color:#888">${a.date}</td><td><div style="display:flex;gap:6px"><button class="mini-btn mini-red" onclick="approveVerification(${i})">Verify ✔</button><button class="mini-btn mini-dark" onclick="rejectVerification(${i})">Reject</button></div></td></tr>`).join('')}</tbody></table>`;
+ }
+ if(tab==='upcoming'){
+  let up=getData('artists_upcoming',UP);
+  c.innerHTML=`<table class="admin-table"><thead><tr><th>Artist (UNVERIFIED)</th><th>Location</th><th>Price</th><th>Genre</th><th>Actions</th></tr></thead><tbody>${up.map((a,i)=>`<tr><td><div class="artist-cell"><img src="${a.img}"><div><b>${a.name} <span style="background:var(--red);color:#fff;padding:2px 6px;border-radius:8px;font-size:8px;margin-left:6px">NOT VERIFIED</span></b><span>ID: ${i+1}</span></div></div></td><td>${a.loc}</td><td><input value="${a.price}" id="up_${i}" class="price-input"></td><td>${a.genre}</td><td><div style="display:flex;gap:6px"><button class="mini-btn mini-dark" onclick="savePrice('upcoming',${i})">Save</button><button class="mini-btn mini-yellow" onclick="verifyArtist(${i})"><i class="fa-solid fa-circle-check"></i> Verify → Top</button><button class="mini-btn mini-dark" onclick="delArtist('upcoming',${i})"><i class="fa-solid fa-trash"></i></button></div></td></tr>`).join('')}</tbody></table>`;
+ }
+ if(tab==='top'){
+  let top=getData('artists_top',TOP);
+  c.innerHTML=`<table class="admin-table"><thead><tr><th>Artist (VERIFIED)</th><th>Location</th><th>Price</th><th>Bookings</th><th>Actions</th></tr></thead><tbody>${top.map((a,i)=>`<tr><td><div class="artist-cell"><img src="${a.img}" style="border:2px solid var(--yellow)"><div><b>${a.name} <span style="background:var(--yellow);color:#000;padding:2px 6px;border-radius:8px;font-size:8px;margin-left:6px">✔ VERIFIED</span></b><span>${a.genre}</span></div></div></td><td>${a.loc}</td><td><input value="${a.price}" id="top_${i}" class="price-input" style="border-color:var(--yellow)"></td><td><span style="background:var(--yellow);color:#000;padding:3px 8px;border-radius:10px;font-weight:800;font-size:10px">${a.sales||0}</span></td><td><div style="display:flex;gap:6px"><button class="mini-btn mini-dark" onclick="savePrice('top',${i})">Save</button><button class="mini-btn mini-red" onclick="unverifyArtist(${i})"><i class="fa-solid fa-circle-xmark"></i> Unverify</button><button class="mini-btn mini-dark" onclick="delArtist('top',${i})"><i class="fa-solid fa-trash"></i></button></div></td></tr>`).join('')}</tbody></table>`;
+ }
+ if(tab==='venues'){
+  let venues=getData('artists_venues',VENUES);
+  c.innerHTML=`<table class="admin-table"><thead><tr><th>Venue</th><th>Location</th><th>Capacity</th><th>Price</th><th>Actions</th></tr></thead><tbody>${venues.map((a,i)=>`<tr><td><div class="artist-cell"><img src="${a.img}"><div><b>${a.name}</b></div></div></td><td>${a.loc}</td><td>${a.cap}</td><td>${a.price}</td><td><button class="mini-btn mini-dark" onclick="delVenue(${i})">Delete</button></td></tr>`).join('')}</tbody></table>`;
+ }
+ if(tab==='add'){
+  c.innerHTML=`<div class="add-form"><div style="grid-column:1/-1"><h3 style="font-size:14px;font-weight:900">➕ Add New Artist / Venue</h3><p style="font-size:11px;color:#888">Choose verified status</p></div><input class="input" id="addName" placeholder="Name *"><input class="input" id="addLoc" placeholder="Location *"><input class="input" id="addPrice" placeholder="Price *"><input class="input" id="addGenre" placeholder="Genre / Capacity"><input class="input" id="addImg" placeholder="Image URL *" style="grid-column:1/-1"><select class="input" id="addType"><option value="upcoming">🔴 Upcoming - NOT VERIFIED</option><option value="top">🟡 Top - VERIFIED ✔</option><option value="venue">📍 Venue</option></select><button class="bookbtn" onclick="addArtistManual()" style="border-radius:8px">Add to Platform</button></div>`;
+ }
+}
+function verifyArtist(i){
+  if(!confirm('Verify this artist? Move to Top Verified?')) return;
+  let up=getData('artists_upcoming',UP);
+  let top=getData('artists_top',TOP);
+  let art=up[i];
+  up.splice(i,1);
+  art.sales=art.sales||0;
+  top.push(art);
+  saveData('artists_upcoming',up);
+  saveData('artists_top',top);
+  adminTab('upcoming');
+  render();
+  alert('✅ '+art.name+' is now VERIFIED! Moved to Top 15');
+}
+function unverifyArtist(i){
+  if(!confirm('Unverify this artist? Move back to Upcoming?')) return;
+  let up=getData('artists_upcoming',UP);
+  let top=getData('artists_top',TOP);
+  let art=top[i];
+  top.splice(i,1);
+  up.push(art);
+  saveData('artists_upcoming',up);
+  saveData('artists_top',top);
+  adminTab('top');
+  render();
+  alert('⚠️ '+art.name+' is now UNVERIFIED! Moved to Upcoming');
+}
+function approve(i){let p=JSON.parse(localStorage.getItem('pending_artists')||'[]');let up=getData('artists_upcoming',UP);let art=p[i];p.splice(i,1);up.push({name:art.name,loc:art.loc,price:art.price,genre:art.genre,img:art.img});localStorage.setItem('pending_artists',JSON.stringify(p));saveData('artists_upcoming',up);adminTab('pending');render();}
+function reject(i){let p=JSON.parse(localStorage.getItem('pending_artists')||'[]');p.splice(i,1);localStorage.setItem('pending_artists',JSON.stringify(p));adminTab('pending');render();}
+function approveVerification(i){let v=JSON.parse(localStorage.getItem('verify_requests')||'[]');let req=v[i];let up=getData('artists_upcoming',UP);let top=getData('artists_top',TOP);let idx=up.findIndex(a=>a.name.toLowerCase()===req.name.toLowerCase());let artist=null;if(idx!==-1){artist=up[idx];up.splice(idx,1);}else{artist={name:req.name,loc:'Kampala',price:'500K',genre:'Verified',img:'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',sales:0}}top.push(artist);v.splice(i,1);localStorage.setItem('verify_requests',JSON.stringify(v));saveData('artists_upcoming',up);saveData('artists_top',top);adminTab('verify');render();}
+function rejectVerification(i){let v=JSON.parse(localStorage.getItem('verify_requests')||'[]');v.splice(i,1);localStorage.setItem('verify_requests',JSON.stringify(v));adminTab('verify');render();}
+function delArtist(type,i){if(!confirm('Delete?'))return;if(type==='upcoming'){let d=getData('artists_upcoming',UP);d.splice(i,1);saveData('artists_upcoming',d);adminTab('upcoming')}else{let d=getData('artists_top',TOP);d.splice(i,1);saveData('artists_top',d);adminTab('top')}render();}
+function delVenue(i){if(!confirm('Delete venue?'))return;let d=getData('artists_venues',VENUES);d.splice(i,1);saveData('artists_venues',d);adminTab('venues');render();}
+function savePrice(type,i){if(type==='upcoming'){let d=getData('artists_upcoming',UP);d[i].price=document.getElementById('up_'+i).value;saveData('artists_upcoming',d)}else{let d=getData('artists_top',TOP);d[i].price=document.getElementById('top_'+i).value;saveData('artists_top',d)}render();}
+function addArtistManual(){let name=document.getElementById('addName').value;if(!name){alert('Enter name');return}let obj={name,loc:document.getElementById('addLoc').value||'Kampala',price:document.getElementById('addPrice').value||'300K',genre:document.getElementById('addGenre').value||'Artist',img:document.getElementById('addImg').value||'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',sales:0};let type=document.getElementById('addType').value;if(type==='top'){let d=getData('artists_top',TOP);d.push(obj);saveData('artists_top',d)}else if(type==='venue'){let d=getData('artists_venues',VENUES);obj.cap=obj.genre||'500';d.push(obj);saveData('artists_venues',d)}else{let d=getData('artists_upcoming',UP);d.push(obj);saveData('artists_upcoming',d)}alert('✅ Added!');render();adminTab(type==='venue'?'venues':type);}
+
+render();
+document.getElementById('search').addEventListener('input',e=>{let q=e.target.value.toLowerCase();if(!q){showView('home');return}showView('search');setTimeout(()=>{document.querySelectorAll('#gridAll.sp-card').forEach(c=>{c.style.display=c.dataset.name.includes(q)||c.dataset.loc.includes(q)?'':'none'})},100)});
+</script>
+</body>
+</html>
